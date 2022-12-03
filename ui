@@ -1291,6 +1291,7 @@ function library:LoadConfig(name, universal)
 end
 
 function library:GetConfigs(universal)
+    print("Getting configs")
     assert(self.folder, "No folder specified")
     assert(self.extension, "No file extension specified")
 
@@ -1302,12 +1303,14 @@ function library:GetConfigs(universal)
         local name = config:gsub(placeidfolder .. "\\", ""):gsub("." .. self.extension, "")
         table.insert(configs, name)
     end
+    print("Getting configs")
 
     if universal and isfolder(universalfolder) then
         for _, config in next, (isfolder(placeidfolder) and listfiles(placeidfolder) or {}) do
             configs[config:gsub(universalfolder .. "\\", "")] = readfile(config)
         end
     end
+    print("Getting configs")
 
     return configs
 end
