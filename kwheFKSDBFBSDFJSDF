@@ -1,0 +1,398 @@
+-- Decompiled with the Synapse X Luau decompiler.
+
+local v1 = {};
+local v2 = require(game.ReplicatedStorage.Modules:WaitForChild("UniversalTables"));
+local l__Players__3 = game:GetService("Players");
+local l__ReplicatedStorage__4 = game:GetService("ReplicatedStorage");
+local l__Remotes__5 = l__ReplicatedStorage__4:WaitForChild("Remotes");
+local l__Modules__6 = game.ReplicatedStorage:WaitForChild("Modules");
+local l__SFX__7 = l__ReplicatedStorage__4:WaitForChild("SFX");
+local l__LocalPlayer__8 = l__Players__3.LocalPlayer;
+local v9 = l__ReplicatedStorage__4:WaitForChild("Players"):WaitForChild(l__LocalPlayer__8.Name);
+local v10 = { "LeftFoot", "LeftHand", "LeftLowerArm", "LeftLowerLeg", "LeftUpperArm", "LeftUpperLeg", "LowerTorso", "RightFoot", "RightHand", "RightLowerArm", "RightLowerLeg", "RightUpperArm", "RightUpperLeg", "RightUpperLeg", "UpperTorso", "Head", "FaceHitBox", "HeadTopHitBox" };
+local l__RangedWeapons__1 = l__ReplicatedStorage__4:WaitForChild("RangedWeapons");
+local u2 = require(game.ReplicatedStorage.Modules:WaitForChild("FunctionLibraryExtension"));
+local l__Temp__3 = game.ReplicatedStorage.Temp;
+local l__VFX__4 = game.ReplicatedStorage:WaitForChild("VFX");
+local l__Debris__5 = game:GetService("Debris");
+local function u6(p1, p2)
+    local v11 = nil;
+    local v12 = nil;
+    local v13 = nil;
+    local v14 = nil;
+    local l__Keypoints__15 = p1.Keypoints;
+    for v16 = 1, #l__Keypoints__15 do
+        if v16 == 1 then
+            v11 = NumberSequenceKeypoint.new(l__Keypoints__15[v16].Time, l__Keypoints__15[v16].Value * p2);
+        elseif v16 == 2 then
+            v12 = NumberSequenceKeypoint.new(l__Keypoints__15[v16].Time, l__Keypoints__15[v16].Value * p2);
+        elseif v16 == 3 then
+            v13 = NumberSequenceKeypoint.new(l__Keypoints__15[v16].Time, l__Keypoints__15[v16].Value * p2);
+        elseif v16 == 4 then
+            v14 = NumberSequenceKeypoint.new(l__Keypoints__15[v16].Time, l__Keypoints__15[v16].Value * p2);
+        end;
+    end;
+    return NumberSequence.new({ v11, v12, v13, v14 });
+end;
+local u7 = v2.ReturnTable("GlobalIgnoreListProjectile");
+local l__RootScanHeight__8 = v2.UniversalTable.GameSettings.RootScanHeight;
+local l__FireProjectile__9 = game.ReplicatedStorage.Remotes.FireProjectile;
+local u10 = require(game.ReplicatedStorage.Modules:WaitForChild("VFX"));
+local l__ProjectileInflict__11 = game.ReplicatedStorage.Remotes.ProjectileInflict;
+local l__RunService__12 = game:GetService("RunService");
+function v1.CreateBullet(p3, p4, p5, p6, p7, p8, p9, p10, p11, Settings)
+    local l__Character__17 = l__LocalPlayer__8.Character;
+    local l__HumanoidRootPart__18 = l__Character__17.HumanoidRootPart;
+    if not l__Character__17:FindFirstChild(p4.Name) then
+        return;
+    end;
+    if p6.Item.Attachments:FindFirstChild("Front") then
+        local v19 = p6.Item.Attachments.Front:GetChildren()[1].Barrel;
+        local l__Barrel__20 = p5.Attachments.Front:GetChildren()[1].Barrel;
+    else
+        v19 = p6.Item.Barrel;
+        local l__Barrel__21 = p5.Barrel;
+    end;
+    local l__ItemRoot__22 = p5.ItemRoot;
+    local v23 = l__RangedWeapons__1:FindFirstChild(p4.Name);
+    local v24 = l__ReplicatedStorage__4.AmmoTypes:FindFirstChild(p8);
+    local v25 = v23:GetAttribute("ProjectileColor");
+    local v26 = v23:GetAttribute("BulletMaterial");
+    local v27 = v24:GetAttribute("ProjectileDrop");
+    local v28 = v24:GetAttribute("MuzzleVelocity");
+    local v29 = v24:GetAttribute("Tracer");
+    local v30 = v23:GetAttribute("RecoilRecoveryTimeMod");
+    local v31 = v24:GetAttribute("AccuracyDeviation");
+    local v32 = v24:GetAttribute("Pellets");
+    local v33 = v24:GetAttribute("Damage");
+    local v34 = v24:GetAttribute("Arrow");
+    local v35 = v24:GetAttribute("ProjectileWidth");
+    local v36 = v24:GetAttribute("ArmorPen");
+    if p10 and v23:FindFirstChild("RecoilPattern") then
+        local v37 = #v23.RecoilPattern:GetChildren();
+        if p10 == 1 then
+            local v38 = {
+                x = {
+                    Value = v23.RecoilPattern["1"].x.Value * math.random(-3, 3) * 0.33
+                }, 
+                y = {
+                    Value = v23.RecoilPattern["1"].y.Value
+                }
+            };
+        else
+            v38 = v23.RecoilPattern:FindFirstChild(tostring(p10));
+        end;
+    else
+        v38 = {
+            x = {
+                Value = math.random(-5, 5) * 0.01
+            }, 
+            y = {
+                Value = math.random(5, 10) * 0.01
+            }
+        };
+    end;
+    local v39 = p4.ItemProperties.Tool:GetAttribute("MuzzleDevice") and "Default";
+    local v40 = v24:GetAttribute("RecoilStrength");
+    local v41 = v40;
+    local v42 = v40;
+    local l__Attachments__43 = p4:FindFirstChild("Attachments");
+    if l__Attachments__43 then
+        local v44 = l__Attachments__43:GetChildren();
+        for v45 = 1, #v44 do
+            local v46 = v44[v45]:FindFirstChildOfClass("StringValue");
+            if v46 and v46.ItemProperties:FindFirstChild("Attachment") then
+                local l__Attachment__47 = v46.ItemProperties.Attachment;
+                local v48 = l__Attachment__47:GetAttribute("Recoil");
+                if v48 then
+                    v41 = v41 + v48 * l__Attachment__47:GetAttribute("HRecoilMod");
+                    v42 = v42 + v48 * l__Attachment__47:GetAttribute("VRecoilMod");
+                end;
+                local v49 = l__Attachment__47:GetAttribute("MuzzleDevice");
+                if v49 then
+                    v39 = v49;
+                    if p6.Item.Attachments.Muzzle:FindFirstChild(v46.Name):FindFirstChild("BarrelExtension") then
+                        v19 = p6.Item.Attachments.Muzzle:FindFirstChild(v46.Name):FindFirstChild("BarrelExtension");
+                        local l__BarrelExtension__50 = p5.Attachments.Muzzle:FindFirstChild(v46.Name):FindFirstChild("BarrelExtension");
+                    end;
+                end;
+            end;
+        end;
+    end;
+    if v39 == "Suppressor" then
+        if tick() - p9 < 0.8 then
+            u2:PlaySoundV2(l__ItemRoot__22.FireSoundSupressed, l__ItemRoot__22.FireSoundSupressed.TimeLength, l__Temp__3);
+        else
+            u2:PlaySoundV2(l__ItemRoot__22.FireSoundSupressed, l__ItemRoot__22.FireSoundSupressed.TimeLength, l__Temp__3);
+        end;
+    elseif tick() - p9 < 0.8 then
+        u2:PlaySoundV2(l__ItemRoot__22.FireSound, l__ItemRoot__22.FireSound.TimeLength, l__Temp__3);
+    else
+        u2:PlaySoundV2(l__ItemRoot__22.FireSound, l__ItemRoot__22.FireSound.TimeLength, l__Temp__3);
+    end;
+    if v23:GetAttribute("MuzzleEffect") == true then
+        local v51 = l__VFX__4.MuzzleEffects:FindFirstChild(v39):GetChildren();
+        local v52 = v51[math.random(1, #v51)];
+        local v53 = v52.Particles:GetChildren();
+        if v52:FindFirstChild("MuzzleLight") then
+            local v54 = v52.MuzzleLight:Clone();
+            v54.Range = math.clamp(v54.Range + math.random(-2, 2) / 2, 0, 50);
+            v54.Enabled = true;
+            l__Debris__5:AddItem(v54, 0.1);
+            v54.Parent = v19;
+        end;
+        for v55 = 1, #v53 do
+            if v53[v55].className == "ParticleEmitter" then
+                local v56 = v53[v55]:Clone();
+                local v57 = math.clamp(v33 / 45 / 2.4, 0, 0.6);
+                if v32 then
+                    v57 = math.clamp(v33 * v32 / 45 / 2.4, 0, 0.6);
+                end;
+                local v58 = math.clamp(v57, 1, 10);
+                v56.Lifetime = NumberRange.new(v56.Lifetime.Min * v58, v56.Lifetime.Max * v58);
+                v56.Size = u6(v56.Size, v57);
+                v56.Parent = v19;
+                v56:Emit(v56:GetAttribute("EmitCount") and 1);
+                l__Debris__5:AddItem(v56, v56.Lifetime.Max);
+            end;
+        end;
+    end;
+    local u13 = 0;
+    local l__LookVector__14 = p11.CFrame.LookVector;
+    if Settings.CurrentTargetPart and Settings.SilentAim then 
+        l__LookVector__14 = CFrame.new(workspace.CurrentCamera.CFrame.p, Settings.CurrentTargetPart.Position).LookVector
+    end
+    local l__p__15 = l__HumanoidRootPart__18.CFrame.p;
+    local u16 = "";
+    local u17 = v28;
+    local l__CurrentCamera__18 = workspace.CurrentCamera;
+    local u19 = v28 / 2700;
+    local u20 = v36;
+    local function v59()
+        u13 = u13 + 1;
+        local v60 = RaycastParams.new();
+        v60.FilterType = Enum.RaycastFilterType.Blacklist;
+        local v61 = { l__Character__17, p6, u7 };
+        v60.FilterDescendantsInstances = v61;
+        v60.IgnoreWater = true;
+        v60.CollisionGroup = "WeaponRay";
+        local v62 = tick();
+        local v63 = l__LookVector__14;
+        local v64 = Vector3.new(l__p__15.X, l__p__15.Y + l__RootScanHeight__8, l__p__15.Z);
+        local v65 = v64 + l__LookVector__14 * 1000;
+        -- if v31 then
+        --  v65 = v65 + Vector3.new(math.random(-v31, v31), math.random(-v31, v31), math.random(-v31, v31));
+        --  v63 = (v65 - v64).Unit;
+        -- end;
+        if u13 == 1 then
+            u16 = v65.Y .. "posY" .. game.Players.LocalPlayer.UserId .. "Id" .. tick();
+            l__FireProjectile__9:FireServer(v63, u16, false, {
+                A1 = p4.Name
+            });
+        elseif u13 > 1 then
+            l__FireProjectile__9:FireServer(v63, u16, true, {
+                A1 = p4.Name
+            });
+        end;
+        local v66 = nil;
+        if v29 then
+            v66 = l__VFX__4.MuzzleEffects.NewTracer:Clone();
+            v66.Name = u16;
+            v66.Color = v25;
+            l__Debris__5:AddItem(v66, 10);
+            v66.Position = Vector3.new(0, -100, 0);
+            v66.Trail.Enabled = false;
+            v66.Parent = game.Workspace.NoCollision.Effects;
+            local l__AssemblyLinearVelocity__67 = l__HumanoidRootPart__18.AssemblyLinearVelocity;
+            local l__Position__68 = v19.Position;
+            v66.CFrame = CFrame.new(Vector3.new(l__Position__68.X + l__AssemblyLinearVelocity__67.X / 12, l__Position__68.Y + l__AssemblyLinearVelocity__67.Y / 12, l__Position__68.Z + l__AssemblyLinearVelocity__67.Z / 12), v19.CFrame.LookVector);
+            v66.Trail.Enabled = true;
+        end;
+        local u21 = nil;
+        local u22 = 0;
+        local u23 = 0;
+        local u24 = v64;
+        local u25 = v63;
+        local u26 = 0;
+        local u27 = {};
+        local u28 = {};
+        local u29 = false;
+        local u30 = {
+            a1 = v27, 
+            a2 = u17
+        };
+        u21 = l__RunService__12.RenderStepped:Connect(function(p12)
+            if Settings.fastBullet then 
+                u22 = 1
+            else
+                u22 = u22 + p12;
+            end
+            if u22 > 0.008333333333333333 then
+                u23 = u23 + u22;
+                local v69 = u17 * u22;
+                local v70;
+                if Settings.fastBullet then 
+                    v70 = workspace:Raycast(u24, u25 * 1000, v60);
+                else 
+                    v70 = workspace:Raycast(u24, u25 * v69, v60);
+                end
+                local v71 = nil;
+                local v72 = nil;
+                local v73 = nil;
+                if v70 then
+                    v71 = v70.Instance;
+                    local v74 = v70.Position;
+                    v72 = v70.Normal;
+                    v73 = v70.Material;
+                else
+                    v74 = u24 + u25 * v69;
+                end;
+                u26 = u26 + (u24 - v74).magnitude;
+                if v66 then
+                    local v75 = math.clamp((l__CurrentCamera__18.CFrame.Position - v74).magnitude / 60, 0.2 * u19, 60 * u19);
+                    v66.Size = Vector3.new(v75, v75, v75);
+                    v66.CFrame = CFrame.new(v74, u25);
+                end;
+                local v76 = "nil";
+                if v71 then
+                    v76 = tostring((math.floor(v74.X))) .. tostring((math.floor(v74.Y))) .. tostring((math.floor(v74.Z))) .. tostring((math.floor(v72.X))) .. tostring((math.floor(v72.Y))) .. tostring((math.floor(v72.Z)));
+                    if u27[v76] then
+                        v74 = v74 - v72 * 0.1;
+                    end;
+                end;
+                if v71 and not u27[v76] then
+                    table.insert(u28, {
+                        step = u22
+                    });
+                    local v77 = u2:FindDeepAncestor(v71, "Model");
+                    if v71:FindFirstChild("RealParent") then
+                        v77 = v71.RealParent.Value;
+                    end;
+                    if v71:GetAttribute("PassThrough", 2) then
+                        table.insert(v61, v71);
+                        v60.FilterDescendantsInstances = v61;
+                        return;
+                    end;
+                    if v71:GetAttribute("PassThrough", 1) and v34 == nil then
+                        table.insert(v61, v71);
+                        v60.FilterDescendantsInstances = v61;
+                        return;
+                    end;
+                    if v71:GetAttribute("Glass") then
+                        u10.Impact(v71, v74, v72, v73, u25, "Ranged", true);
+                        table.insert(v61, v71);
+                        v60.FilterDescendantsInstances = v61;
+                        return;
+                    end;
+                    if v71.Name == "Terrain" then
+                        -- if u29 == false and v73 == Enum.Material.Water then
+                        --  u29 = true;
+                        --  v60.IgnoreWater = true;
+                        --  u10.Impact(v71, v74, v72, v73, u25, "Ranged", true);
+                        --  return;
+                        -- end;
+                        u10.Impact(v71, v74, v72, v73, u25, "Ranged", true);
+                        u21:Disconnect();
+                        if v66 then
+                            if v66.Trail then
+                                wait(60);
+                            end;
+                            v66:Destroy();
+                            return;
+                        end;
+                    elseif v77:FindFirstChild("Humanoid") then
+                        local l__p__78 = l__HumanoidRootPart__18.CFrame.p;
+                        local v79 = Vector3.new(l__p__78.X, l__p__78.Y + 1.6, l__p__78.Z);
+                        local v80 = Ray.new(v79, (v65 - v79).unit * 7500);
+                        local v81 = v80.Origin - v74;
+                        local l__Direction__82 = v80.Direction;
+                        l__ProjectileInflict__11:FireServer(v77, v71, u16, u28, v74, (v74 + (v81 - v81:Dot(l__Direction__82) / l__Direction__82:Dot(l__Direction__82) * l__Direction__82)).Y, v71.Position.X - v74.X, v71.Position.Z - v74.Z, u30);
+                        u10.Impact(v71, v74, v72, v73, u25, "Ranged", true);
+                        u21:Disconnect();
+                        if v66 then
+                            if v66.Trail then
+                                wait(60);
+                            end;
+                            v66:Destroy();
+                            return;
+                        end;
+                    elseif v77.ClassName == "Model" and v77.PrimaryPart ~= nil and v77.PrimaryPart:GetAttribute("Health") then
+                        local l__p__83 = l__HumanoidRootPart__18.CFrame.p;
+                        local v84 = Vector3.new(l__p__83.X, l__p__83.Y + 1.6, l__p__83.Z);
+                        local v85 = Ray.new(v84, (v65 - v84).unit * 7500);
+                        local v86 = v85.Origin - v74;
+                        local l__Direction__87 = v85.Direction;
+                        l__ProjectileInflict__11:FireServer(v77, v71, u16, u28, v74, (v74 + (v86 - v86:Dot(l__Direction__87) / l__Direction__87:Dot(l__Direction__87) * l__Direction__87)).Y, v71.Position.X - v74.X, v71.Position.Z - v74.Z, u30);
+                        if v77.Parent.Name ~= "SleepingPlayers" and v72 then
+                            u10.Impact(v71, v74, v72, v73, u25, "Ranged", true);
+                        end;
+                        u21:Disconnect();
+                        if v66 then
+                            if v66.Trail then
+                                wait(60);
+                            end;
+                            v66:Destroy();
+                            return;
+                        end;
+                    else
+                        u10.Impact(v71, v74, v72, v73, u25, "Ranged", true);
+                        local v88, v89, v90 = u2:Penetration(v71, v74, u25, u20);
+                        u20 = 99;
+                        if u20 > 0 then
+                            u10.Impact(unpack(v90));
+                            u17 = v28 * math.clamp(u20 / v36, 0.15, 1);
+                            u24 = v89;
+                            u27[v76] = true;
+                            v60.FilterDescendantsInstances = v61;
+                            return;
+                        end;
+                        u21:Disconnect();
+                        if v66 then
+                            if v66.Trail then
+                                wait(60);
+                            end;
+                            v66:Destroy();
+                            return;
+                        end;
+                    end;
+                elseif u26 > 2500 or tick() - v62 > 60 then
+                    u21:Disconnect();
+                    if v66 then
+                        if v66.Trail then
+                            wait(60);
+                        end;
+                        v66:Destroy();
+                        return;
+                    end;
+                else
+                    u24 = v74;
+                    u25 = (u24 + u25 * 10000 - Vector3.new(0, 0 / 2 * u23 ^ 2, 0) - u24).Unit;
+                    table.insert(u28, {
+                        step = u22
+                    });
+                    u22 = 0;
+                end;
+            end;
+        end);
+    end;
+    if v32 ~= nil then
+        local u31 = 0;
+        coroutine.wrap(function()
+            while u31 < 3 do
+                wait();         
+            end;
+            u10.RecoilCamera(l__LocalPlayer__8, l__CurrentCamera__18, p7, v41, v42, v30, v38);
+        end)();
+        for v91 = 1, v32 do
+            coroutine.wrap(v59)();
+            u31 = u31 + 1;
+        end;
+    else
+        coroutine.wrap(v59)();
+        u10.RecoilCamera(l__LocalPlayer__8, l__CurrentCamera__18, p7, v41, v42, v30, v38);
+    end;
+    return v41 / 200, v42 / 200, v39, v38;
+end;
+return v1;
+
+
